@@ -19,7 +19,7 @@ function RCpair{T<:AbstractFloat}(realtype::Type{T}, realsize, region=1:length(r
     C = Array(Complex{T}, sz...)
     sz[firstdim] *= 2
     R = reinterpret(T, C, tuple(sz...))
-    RCpair(sub(R, map(n->1:n, realsize)), C, [region...])
+    RCpair(sub(R, map(n->1:n, realsize)...), C, [region...])
 end
 RCpair{T<:AbstractFloat}(A::Array{T}, region=1:ndims(A)) = copy!(RCpair(T, size(A), region), A)
 
@@ -75,7 +75,7 @@ else
 
     function plan_rfft!{T}(RC::RCpair{T}; flags::Integer = FFTW.ESTIMATE, timelimit::Real = FFTW.NO_TIMELIMIT)
         p = rplan_fwd(RC.R, RC.C, RC.region, flags, timelimit)
-        return Z::RCpair{T} -> begin
+        return Z::RCpair -> begin
             FFTW.assert_applicable(p, Z.R, Z.C)
             FFTW.unsafe_execute!(p, Z.R, Z.C)
             return Z
@@ -84,7 +84,7 @@ else
 
     function plan_irfft!{T}(RC::RCpair{T}; flags::Integer = FFTW.ESTIMATE, timelimit::Real = FFTW.NO_TIMELIMIT)
         p = rplan_inv(RC.C, RC.R, RC.region, flags, timelimit)
-        return Z::RCpair{T} -> begin
+        return Z::RCpair -> begin
             FFTW.assert_applicable(p, Z.C, Z.R)
             FFTW.unsafe_execute!(p, Z.C, Z.R)
             scale!(Z.R, 1 / prod(size(Z.R)[Z.region]))
