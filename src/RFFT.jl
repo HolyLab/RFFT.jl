@@ -2,6 +2,8 @@ __precompile__()
 
 module RFFT
 
+using Compat
+
 export RCpair, plan_rfft!, plan_irfft!, rfft!, irfft!, normalization
 
 import Base: real, complex, copy, copy!
@@ -19,7 +21,7 @@ function RCpair{T<:AbstractFloat}(realtype::Type{T}, realsize, region=1:length(r
     C = Array(Complex{T}, sz...)
     sz[firstdim] *= 2
     R = reinterpret(T, C, tuple(sz...))
-    RCpair(sub(R, map(n->1:n, realsize)...), C, [region...])
+    RCpair(Compat.view(R, map(n->1:n, realsize)...), C, [region...])
 end
 RCpair{T<:AbstractFloat}(A::Array{T}, region=1:ndims(A)) = copy!(RCpair(T, size(A), region), A)
 
