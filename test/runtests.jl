@@ -9,10 +9,10 @@ for region in (1:2, 1, 2)
         copy!(r, b)
         RFFT.rfft!(pair)
         RFFT.irfft!(pair)
-        @test_approx_eq r b
+        @test r ≈ b
         pfwd = RFFT.plan_rfft!(pair)
         pinv = RFFT.plan_irfft!(pair)
         pinv(pfwd(pair))
-        @test_approx_eq r b
+        @test r ≈ b
     end
 end

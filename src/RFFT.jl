@@ -18,7 +18,7 @@ function RCpair{T<:AbstractFloat}(realtype::Type{T}, realsize, region=1:length(r
     sz = [realsize...]
     firstdim = region[1]
     sz[firstdim] = realsize[firstdim]>>1 + 1
-    C = Array(Complex{T}, sz...)
+    C = Array{Complex{T}}((sz...))
     sz[firstdim] *= 2
     R = reinterpret(T, C, tuple(sz...))
     RCpair(Compat.view(R, map(n->1:n, realsize)...), C, [region...])
