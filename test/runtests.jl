@@ -1,5 +1,5 @@
 import RFFT
-using Base.Test
+using Test
 
 for region in (1:2, 1, 2)
     for sz in ((5,6), (6,5))
