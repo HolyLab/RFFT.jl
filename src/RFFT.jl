@@ -1,13 +1,13 @@
 module RFFT
 
-using Compat
+using Compat, FFTW, LinearAlgebra
 
 export RCpair, plan_rfft!, plan_irfft!, rfft!, irfft!, normalization
 
 import Base: real, complex, copy, copy!
 
 mutable struct RCpair{T<:AbstractFloat,N}
-    R::SubArray{T,N,Array{T,N},NTuple{N,UnitRange{Int}}}
+    R::SubArray{T,N}
     C::Array{Complex{T},N}
     region::Vector{Int}
 end
@@ -16,9 +16,9 @@ function RCpair(realtype::Type{T}, realsize, region=1:length(realsize)) where T<
     sz = [realsize...]
     firstdim = region[1]
     sz[firstdim] = realsize[firstdim]>>1 + 1
-    C = Array{Complex{T}}((sz...,))
+    C = Array{Complex{T}}(undef, (sz...,))
     sz[firstdim] *= 2
-    R = reinterpret(T, C, tuple(sz...))
+    R = reshape(reinterpret(T, vec(C)), tuple(sz...,))
     RCpair(Compat.view(R, map(n->1:n, realsize)...), C, [region...])
 end
 RCpair(A::Array{T}, region=1:ndims(A)) where {T<:AbstractFloat} = copy!(RCpair(T, size(A), region), A)
@@ -51,7 +51,7 @@ function plan_irfft!(RC::RCpair{T}; flags::Integer = FFTW.ESTIMATE, timelimit::R
     return Z::RCpair -> begin
         FFTW.assert_applicable(p, Z.C, Z.R)
         FFTW.unsafe_execute!(p, Z.C, Z.R)
-        scale!(Z.R, 1 / prod(size(Z.R)[Z.region]))
+        rmul!(Z.R, 1 / prod(size(Z.R)[Z.region]))
         return Z
     end
 end
@@ -63,7 +63,7 @@ end
 function irfft!(RC::RCpair{T}) where T
     p = rplan_inv(RC.C, RC.R, RC.region, FFTW.ESTIMATE, FFTW.NO_TIMELIMIT)
     FFTW.unsafe_execute!(p, RC.C, RC.R)
-    scale!(RC.R, 1 / prod(size(RC.R)[RC.region]))
+    rmul!(RC.R, 1 / prod(size(RC.R)[RC.region]))
     return RC
 end
 
