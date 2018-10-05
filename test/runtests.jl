@@ -1,12 +1,12 @@
 import RFFT
-using Base.Test
+using Test, FFTW, LinearAlgebra
 
 for region in (1:2, 1, 2)
     for sz in ((5,6), (6,5))
         pair = RFFT.RCpair(Float64, sz, region)
         r = real(pair)
         b = rand(eltype(r), size(r))
-        copy!(r, b)
+        copyto!(r, b)
         RFFT.rfft!(pair)
         RFFT.irfft!(pair)
         @test r ≈ b
