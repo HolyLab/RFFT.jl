@@ -12,16 +12,17 @@ mutable struct RCpair{T<:AbstractFloat,N,S<:SubArray{T,N}}
     region::Vector{Int}
 end
 
-function RCpair(realtype::Type{T}, realsize, region=1:length(realsize)) where T<:AbstractFloat
+function RCpair{T}(::UndefInitializer, realsize::Dims, region=1:length(realsize)) where T<:AbstractFloat
     sz = [realsize...]
     firstdim = region[1]
     sz[firstdim] = realsize[firstdim]>>1 + 1
-    C = Array{Complex{T}}(undef, (sz...,))
+    C = Array{Complex{T}}(undef, (sz...,)::typeof(realsize))
     sz[firstdim] *= 2
-    R = reshape(reinterpret(T, vec(C)), tuple(sz...,))
+    R = reshape(reinterpret(T, vec(C)), (sz...,)::typeof(realsize))
     RCpair(view(R, map(n->1:n, realsize)...), C, [region...])
 end
-RCpair(A::Array{T}, region=1:ndims(A)) where {T<:AbstractFloat} = copy!(RCpair(T, size(A), region), A)
+
+RCpair(A::Array{T}, region=1:ndims(A)) where {T<:AbstractFloat} = copy!(RCpair{T}(undef, size(A), region), A)
 
 real(RC::RCpair)    = RC.R
 complex(RC::RCpair) = RC.C
@@ -66,5 +67,7 @@ function irfft!(RC::RCpair{T}) where T
     rmul!(RC.R, 1 / prod(size(RC.R)[RC.region]))
     return RC
 end
+
+@deprecate RCpair(realtype::Type{T}, realsize, region=1:length(realsize)) where T<:AbstractFloat RCpair{T}(undef, realsize, region)
 
 end
