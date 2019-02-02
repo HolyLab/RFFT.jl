@@ -6,8 +6,8 @@ export RCpair, plan_rfft!, plan_irfft!, rfft!, irfft!, normalization
 
 import Base: real, complex, copy, copy!
 
-mutable struct RCpair{T<:AbstractFloat,N}
-    R::SubArray{T,N}
+mutable struct RCpair{T<:AbstractFloat,N,S<:SubArray{T,N}}
+    R::S
     C::Array{Complex{T},N}
     region::Vector{Int}
 end
