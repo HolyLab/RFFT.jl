@@ -6,19 +6,20 @@ export RCpair, plan_rfft!, plan_irfft!, rfft!, irfft!, normalization
 
 import Base: real, complex, copy, copy!
 
-mutable struct RCpair{T<:AbstractFloat,N,S<:SubArray{T,N}}
-    R::S
-    C::Array{Complex{T},N}
+mutable struct RCpair{T<:AbstractFloat,N,RType<:AbstractArray{T,N},CType<:AbstractArray{Complex{T},N}}
+    R::RType
+    C::CType
     region::Vector{Int}
 end
 
-function RCpair{T}(::UndefInitializer, realsize::Dims, region=1:length(realsize)) where T<:AbstractFloat
+function RCpair{T}(::UndefInitializer, realsize::Dims{N}, region=1:length(realsize)) where {T<:AbstractFloat,N}
     sz = [realsize...]
     firstdim = region[1]
     sz[firstdim] = realsize[firstdim]>>1 + 1
-    C = Array{Complex{T}}(undef, (sz...,)::typeof(realsize))
-    sz[firstdim] *= 2
-    R = reshape(reinterpret(T, vec(C)), (sz...,)::typeof(realsize))
+    sz2 = copy(sz)
+    sz2[firstdim] *= 2
+    R = Array{T,N}(undef, (sz2...,)::Dims{N})
+    C = unsafe_wrap(Array, convert(Ptr{Complex{T}}, pointer(R)), (sz...,)::Dims{N}) # work around performance problems of reinterpretarray
     RCpair(view(R, map(n->1:n, realsize)...), C, [region...])
 end
 
