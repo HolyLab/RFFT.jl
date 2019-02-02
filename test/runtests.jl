@@ -15,5 +15,9 @@ for region in (1:2, 1, 2)
         pinv = RFFT.plan_irfft!(pair)
         pinv(pfwd(pair))
         @test r ≈ b
+
+        pair2 = copy(pair)
+        @test real(pair2) == real(pair)
+        @test complex(pair2) == complex(pair)
     end
 end

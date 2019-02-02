@@ -1,6 +1,6 @@
 module RFFT
 
-using Compat, FFTW, LinearAlgebra
+using FFTW, LinearAlgebra
 
 export RCpair, plan_rfft!, plan_irfft!, rfft!, irfft!, normalization
 
@@ -19,7 +19,7 @@ function RCpair(realtype::Type{T}, realsize, region=1:length(realsize)) where T<
     C = Array{Complex{T}}(undef, (sz...,))
     sz[firstdim] *= 2
     R = reshape(reinterpret(T, vec(C)), tuple(sz...,))
-    RCpair(Compat.view(R, map(n->1:n, realsize)...), C, [region...])
+    RCpair(view(R, map(n->1:n, realsize)...), C, [region...])
 end
 RCpair(A::Array{T}, region=1:ndims(A)) where {T<:AbstractFloat} = copy!(RCpair(T, size(A), region), A)
 
@@ -29,8 +29,8 @@ complex(RC::RCpair) = RC.C
 copy!(RC::RCpair, A::AbstractArray{T}) where {T<:Real} = (copy!(RC.R, A); RC)
 function copy(RC::RCpair{T,N}) where {T,N}
     C = copy(RC.C)
-    R = reinterpret(T, C, size(parent(RC.R)))
-    RCpair(sub(R, RC.R.indexes), C, copy(RC.region))
+    R = reshape(reinterpret(T, C), size(parent(RC.R)))
+    RCpair(view(R, RC.R.indices...), C, copy(RC.region))
 end
 
 # New API
