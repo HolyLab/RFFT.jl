@@ -28,8 +28,8 @@ RCpair(A::Array{T}, dims=1:ndims(A)) where {T<:AbstractFloat} = copy!(RCpair{T}(
 real(RC::RCpair)    = RC.R
 complex(RC::RCpair) = RC.C
 
-copy!(RC::RCpair, A::AbstractArray{T}) where {T<:Complex} = (copy!(RC.C, A); RC)
 copy!(RC::RCpair, A::AbstractArray{T}) where {T<:Real} = (copy!(RC.R, A); RC)
+copy!(RC::RCpair, A::AbstractArray{T}) where {T<:Complex} = (copy!(RC.C, A); RC)
 function copy(RC::RCpair{T,N}) where {T,N}
     C = copy(RC.C)
     R = reshape(reinterpret(T, C), size(parent(RC.R)))
