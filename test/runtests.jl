@@ -1,14 +1,16 @@
 import RFFT
 using Test, FFTW, LinearAlgebra
 
-@testset begin
+@testset "RFFT.jl" begin
     for dims in (1:2, 1, 2)
         for sz in ((5,6), (6,5))
             pair = RFFT.RCpair{Float64}(undef, sz, dims)
+            pair = RFFT.RCpair(pair, dims) # for coverage
             r = @inferred(real(pair))
             c = @inferred(complex(pair))
             b = rand(eltype(r), size(r))
             copyto!(r, b)
+            copyto!(r, c) # for coverage
             RFFT.rfft!(pair)
             RFFT.irfft!(pair)
             @test r ≈ b
