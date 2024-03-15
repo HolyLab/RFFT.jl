@@ -70,6 +70,4 @@ function irfft!(RC::RCpair{T}) where T
     return RC
 end
 
-@deprecate RCpair(realtype::Type{T}, realsize, region=1:length(realsize)) where T<:AbstractFloat RCpair{T}(undef, realsize, region)
-
 end
