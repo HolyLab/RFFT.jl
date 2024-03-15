@@ -2,9 +2,9 @@ import RFFT
 using Test, FFTW, LinearAlgebra
 
 @testset begin
-    for region in (1:2, 1, 2)
+    for dims in (1:2, 1, 2)
         for sz in ((5,6), (6,5))
-            pair = RFFT.RCpair{Float64}(undef, sz, region)
+            pair = RFFT.RCpair{Float64}(undef, sz, dims)
             r = @inferred(real(pair))
             c = @inferred(complex(pair))
             b = rand(eltype(r), size(r))
